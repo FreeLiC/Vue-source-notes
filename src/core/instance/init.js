@@ -195,6 +195,9 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
       }
     }
   }
+  /**
+   * 不存在继承的情况下 直接返回options
+   */
   return options
 }
 

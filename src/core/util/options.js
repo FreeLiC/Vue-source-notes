@@ -26,13 +26,26 @@ import {
  * how to merge a parent option value and a child option
  * value into the final value.
  */
+/**
+ * 选项覆盖策略是处理的功能
+ * 如何合并父选项值和子选项
+ * 将值转换为最终值。
+ * @type {any | {[p: string]: Function}}
+ */
 const strats = config.optionMergeStrategies
 
 /**
  * Options with restrictions
  */
+/**
+ * 有限制的选项
+ * 如果不为生产环境
+ */
 if (process.env.NODE_ENV !== 'production') {
   strats.el = strats.propsData = function (parent, child, vm, key) {
+    /**
+     * 如果不存在vm实例报错
+     */
     if (!vm) {
       warn(
         `option "${key}" can only be used during instance ` +
@@ -45,6 +58,12 @@ if (process.env.NODE_ENV !== 'production') {
 
 /**
  * Helper that recursively merges two data objects together.
+ */
+/**
+ * 递归地将两个数据对象合并在一起的Helper。
+ * @param to
+ * @param from
+ * @returns {Object}
  */
 function mergeData (to: Object, from: ?Object): Object {
   if (!from) return to
@@ -180,6 +199,14 @@ LIFECYCLE_HOOKS.forEach(hook => {
  * a three-way merge between constructor options, instance
  * options and parent options.
  */
+/**
+ * 添加指令(directives)、组件(components)、过滤器(filters)等选项的合并策略函数
+ * @param parentVal
+ * @param childVal
+ * @param vm
+ * @param key
+ * @returns {Object|null|*}
+ */
 function mergeAssets (
   parentVal: ?Object,
   childVal: ?Object,
@@ -261,6 +288,13 @@ strats.provide = mergeDataOrFn
 /**
  * Default strategy.
  */
+/**
+ * 默认策略。
+ * 默认的合并策略，如果有 `childVal` 则返回 `childVal` 没有则返回 `parentVal`
+ * @param parentVal
+ * @param childVal
+ * @returns {*}
+ */
 const defaultStrat = function (parentVal: any, childVal: any): any {
   return childVal === undefined
     ? parentVal
@@ -270,20 +304,37 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
 /**
  * Validate component names
  */
+/**
+ * 验证组件名称
+ * @param options
+ */
 function checkComponents (options: Object) {
   for (const key in options.components) {
     validateComponentName(key)
   }
 }
 
+/**
+ * 检查Components名称
+ * @param name
+ */
 export function validateComponentName (name: string) {
   if (!new RegExp(`^[a-zA-Z][\\-\\.0-9_${unicodeRegExp.source}]*$`).test(name)) {
+    /**
+     * 无效的组件名称:组件名称应符合html5规范中的有效自定义元素名称。
+     */
     warn(
       'Invalid component name: "' + name + '". Component names ' +
       'should conform to valid custom element name in html5 specification.'
     )
   }
+  /**
+   * 检查是否为内置标签或者检查标签是否已保留，以便无法将其注册为零件,这与平台有关，可能会被覆盖。
+   */
   if (isBuiltInTag(name) || config.isReservedTag(name)) {
+    /**
+     * 请勿将内置或保留的HTML元素用作组件名称
+     */
     warn(
       'Do not use built-in or reserved HTML elements as component ' +
       'id: ' + name
@@ -295,16 +346,38 @@ export function validateComponentName (name: string) {
  * Ensure all props option syntax are normalized into the
  * Object-based format.
  */
+/**
+ * 确保将所有props选项语法标准化
+ * 基于对象的格式。
+ * @param options
+ * @param vm
+ */
 function normalizeProps (options: Object, vm: ?Component) {
+  /**
+   * props
+   * @type {{}}
+   */
   const props = options.props
+  /**
+   * 不存在props直接返回
+   */
   if (!props) return
   const res = {}
   let i, val, name
+  /**
+   * 如果props为数组
+   */
   if (Array.isArray(props)) {
     i = props.length
     while (i--) {
       val = props[i]
+      /**
+       * 检查props是否为字符串，不为字符串则报warn
+       */
       if (typeof val === 'string') {
+        /**
+         * 将props转换为驼峰命名法
+         */
         name = camelize(val)
         res[name] = { type: null }
       } else if (process.env.NODE_ENV !== 'production') {
@@ -312,42 +385,96 @@ function normalizeProps (options: Object, vm: ?Component) {
       }
     }
   } else if (isPlainObject(props)) {
+    /**
+     * 如果props为对象
+     * 循环遍历
+     */
     for (const key in props) {
       val = props[key]
+      /**
+       * 将props转换为驼峰命名法
+       */
       name = camelize(key)
+      /**
+       * 如果值为对象 直接赋值 否则创造对象赋值
+       */
       res[name] = isPlainObject(val)
         ? val
         : { type: val }
     }
   } else if (process.env.NODE_ENV !== 'production') {
+    /**
+     * 既不为对象也不为数组 报Warn
+     */
     warn(
       `Invalid value for option "props": expected an Array or an Object, ` +
       `but got ${toRawType(props)}.`,
       vm
     )
   }
+  /**
+   * 返回options.props
+   * @type {{}}
+   */
   options.props = res
 }
 
 /**
  * Normalize all injections into Object-based format
  */
+/**
+ * 将所有注入标准化为基于对象的格式
+ * @param options
+ * @param vm
+ */
 function normalizeInject (options: Object, vm: ?Component) {
+  /**
+   * 处理注入
+   * 缓存注入
+   * @type {{}}
+   */
   const inject = options.inject
+  /**
+   * 不存在直接返回
+   */
   if (!inject) return
+  /**
+   * 处理后的序列化的inject
+   * @type {{}}
+   */
   const normalized = options.inject = {}
+  /**
+   * 如果inject为数组
+   */
   if (Array.isArray(inject)) {
+    /**
+     * 循环遍历
+     */
     for (let i = 0; i < inject.length; i++) {
       normalized[inject[i]] = { from: inject[i] }
     }
   } else if (isPlainObject(inject)) {
+    /**
+     * 如果为对象，循环遍历
+     */
     for (const key in inject) {
+      /**
+       * 缓存inject的值
+       */
       const val = inject[key]
+      /**
+       * 赋值序列化的值 如果值为对象
+       * 合并对象
+       * 否则直接返回
+       */
       normalized[key] = isPlainObject(val)
         ? extend({ from: key }, val)
         : { from: val }
     }
   } else if (process.env.NODE_ENV !== 'production') {
+    /**
+     * 非生产环境，报warn
+     */
     warn(
       `Invalid value for option "inject": expected an Array or an Object, ` +
       `but got ${toRawType(inject)}.`,
@@ -359,11 +486,31 @@ function normalizeInject (options: Object, vm: ?Component) {
 /**
  * Normalize raw function directives into object format.
  */
+/**
+ * 将原始函数指令规范化为对象格式。
+ * @param options
+ */
 function normalizeDirectives (options: Object) {
+  /**
+   * 获取options的指令信息
+   */
   const dirs = options.directives
+  /**
+   * 只有在存在指令信息才执行
+   */
   if (dirs) {
+    /**
+     * 对指令信息进行遍历
+     */
     for (const key in dirs) {
+      /**
+       * 缓存指令信息
+       */
       const def = dirs[key]
+      /**
+       * 如果指令为函数,
+       * 认为这里只处理了原型上的自定义指令 model和show
+       */
       if (typeof def === 'function') {
         dirs[key] = { bind: def, update: def }
       }
@@ -385,27 +532,63 @@ function assertObjectType (name: string, value: any, vm: ?Component) {
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
  */
+/**
+ * 将两个选项对象合并到一个新的对象中
+ * 在实例化和继承中都使用的核心实用程序。
+ * @param parent 存在继承或非继承的options
+ * @param child  new Vue的对象
+ * {
+     el: '#app',
+     data: {
+       a: 1,
+       b: [1, 2, 3]
+     }
+    },
+ * @param vm     Vue的实例
+ * @returns {{}}
+ */
 export function mergeOptions (
   parent: Object,
   child: Object,
   vm?: Component
 ): Object {
+  /**
+   * 如果不为生产环境 检查Components
+   */
   if (process.env.NODE_ENV !== 'production') {
     checkComponents(child)
   }
 
+  /**
+   * 如果data 是函数
+   */
   if (typeof child === 'function') {
     child = child.options
   }
 
+  /**
+   * 确保将所有props选项语法标准化
+   */
   normalizeProps(child, vm)
+  /**
+   * 将所有注入标准化为基于对象的格式
+   */
   normalizeInject(child, vm)
+  /**
+   * 将原始函数指令规范化为对象格式。
+   */
   normalizeDirectives(child)
 
   // Apply extends and mixins on the child options,
   // but only if it is a raw options object that isn't
   // the result of another mergeOptions call.
   // Only merged options has the _base property.
+  /**
+   * 在子选项上应用扩展和混合，
+   * 但仅当它是原始选项对象而不是
+   * 另一个mergeOptions调用的结果。
+   * 只有合并的选项才具有_base属性。
+   */
   if (!child._base) {
     if (child.extends) {
       parent = mergeOptions(parent, child.extends, vm)

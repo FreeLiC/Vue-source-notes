@@ -55,6 +55,12 @@ export function toRawType (value: any): string {
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
  */
+/**
+ * 严格的对象类型检查。 只返回true
+ * 用于普通的JavaScript对象。
+ * @param obj
+ * @returns {boolean}
+ */
 export function isPlainObject (obj: any): boolean {
   return _toString.call(obj) === '[object Object]'
 }
@@ -103,6 +109,12 @@ export function toNumber (val: string): number | string {
  * Make a map and return a function for checking if a key
  * is in that map.
  */
+/**
+ * 制作地图并返回用于检查键是否存在的函数在那个地图上。
+ * @param str
+ * @param expectsLowerCase
+ * @returns {*}
+ */
 export function makeMap (
   str: string,
   expectsLowerCase?: boolean
@@ -119,6 +131,10 @@ export function makeMap (
 
 /**
  * Check if a tag is a built-in tag.
+ */
+/**
+ * 检查标签是否为内置标签
+ * @type {function(string): (boolean|void)}
  */
 export const isBuiltInTag = makeMap('slot,component', true)
 
@@ -160,6 +176,10 @@ export function cached<F: Function> (fn: F): F {
 
 /**
  * Camelize a hyphen-delimited string.
+ */
+/**
+ * 驼峰连字符分隔的字符串
+ * @type {RegExp}
  */
 const camelizeRE = /-(\w)/g
 export const camelize = cached((str: string): string => {
@@ -227,6 +247,13 @@ export function toArray (list: any, start?: number): Array<any> {
 
 /**
  * Mix properties into target object.
+ */
+/**
+ * 将属性混合到目标对象中。
+ * 其实就是合并一个对象
+ * @param to
+ * @param _from
+ * @returns {Object}
  */
 export function extend (to: Object, _from: ?Object): Object {
   for (const key in _from) {
